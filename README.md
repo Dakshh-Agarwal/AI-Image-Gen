@@ -139,6 +139,12 @@ CLOUDINARY_API_KEY=your_cloudinary_api_key
 CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 ```
 
+Create `client/.env`:
+
+```env
+VITE_API_URL=http://localhost:8080
+```
+
 ### 4. Run the Application
 
 Start backend (Terminal 1):
@@ -157,24 +163,12 @@ npm run dev
 
 Frontend default URL: `http://localhost:5173`
 
-## Important Note For Local Full-Stack Use
+## Deployment Guide
 
-The frontend currently calls a deployed backend URL in:
-
-- `client/src/page/Home.jsx`
-- `client/src/page/CreatePost.jsx`
-
-If you want the frontend to use your local backend, replace:
-
-- `https://dalle-arbb.onrender.com`
-
-with:
-
-- `http://localhost:8080`
+Deployment instructions are documented in `DEPLOYMENT.md`.
 
 ## Production Considerations
 
-- Move API base URL to an environment variable (frontend).
 - Add request validation and rate limiting on backend routes.
 - Add auth for create-post actions.
 - Add loading/error telemetry and structured logging.
