@@ -23,10 +23,23 @@ app.get('/', async (req, res) => {
 
 const startServer = async () => {
   try {
-    connectDB(process.env.MONGODB_URL);
-    app.listen(8080, () => console.log('Server started on port 8080'));
+    const port = process.env.PORT || 8080;
+    const mongoUrl = process.env.MONGODB_URL || process.env.MONGODB_URI;
+    app.listen(port, () => console.log(`Server started on port ${port}`));
+
+    if (!mongoUrl) {
+      console.warn('MongoDB URL is missing. Set MONGODB_URL (or MONGODB_URI) in server/.env');
+      return;
+    }
+
+    try {
+      await connectDB(mongoUrl);
+    } catch (dbError) {
+      console.error('MongoDB connection failed. API is running, but database features may not work.');
+      console.error(dbError.message);
+    }
   } catch (error) {
-    console.log(error);
+    console.error('Failed to start server:', error.message);
   }
 };
 
