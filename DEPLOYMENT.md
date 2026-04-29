@@ -1,90 +1,58 @@
-# Deployment Guide
+﻿# Deployment Guide
 
-This document describes how to deploy the project end-to-end using any hosting provider of your choice.
+This guide outlines the step-by-step process for deploying the AI Image Generation application using **Vercel** for the React frontend and **Railway** for the Node.js/Express backend.
 
-## 1. Deployment Architecture
+---
 
-- Frontend: React + Vite app from `client/`
-- Backend: Node.js + Express API from `server/`
-- Database: MongoDB (managed or self-hosted)
-- Media storage: Cloudinary
+## 1. Backend Deployment (Railway)
 
-## 2. Backend Deployment
+We deploy the backend first so we have the live API URL to configure the frontend.
 
-Deploy the `server/` folder as a Node.js service.
+### Steps:
+1. **Log in to Railway:** Go to [Railway.app](https://railway.app/) and log in with your GitHub account.
+2. **Create a New Project:** Click on **New Project** -> **Deploy from GitHub repo**.
+3. **Select Repository:** Choose your repository from the drop-down list.
+4. **Configure Root Directory:** 
+   - After selecting the repo, Railway will start deploying the root. Cancel or ignore the first deployment if it fails.
+   - Go to the project settings, find the **Service Settings**, and set the **Root Directory** to /server.
+5. **Set Environment Variables:** 
+   - In the **Variables** tab for your backend service, add all the variables from your local .env file:
+     - \MONGODB_URL\
+     - \CLOUDINARY_CLOUD_NAME\
+     - \CLOUDINARY_API_KEY\
+     - \CLOUDINARY_API_SECRET\
+     - \GEMINI_API_KEY\
+     - \PORT\ (Optional, Railway automatically provides the PORT variable).
+6. **Deploy:** Railway will automatically detect Node.js, run \
+pm install\, and use the \
+pm start\ command from your \server/package.json\ to start the server.
+7. **Get Live URL:** Go to the **Settings** tab and click **Generate Domain** (or Networking -> Public Networking). Save this custom Railway URL (e.g., \https://your-app-production.up.railway.app\) for the frontend.
 
-### Build and Start
+---
 
-- Install command: `npm install`
-- Start command: `npm start`
-- Runtime: Node.js 18+
-- Port: use the platform-provided port if required
+## 2. Frontend Deployment (Vercel)
 
-### Required Environment Variables
+Now that the backend is active, we deploy the Vite React app to Vercel.
 
-Set all of the following on your backend service:
+### Steps:
+1. **Log in to Vercel:** Go to [Vercel.com](https://vercel.com/) and log in with GitHub.
+2. **Add New Project:** Click on **Add New...** -> **Project**.
+3. **Import Repository:** Find your repository and click **Import**.
+4. **Configure Project:**
+   - **Framework Preset:** Vercel should automatically detect **Vite**.
+   - **Root Directory:** Edit the root directory and select \client\.
+   - **Build and Output Settings:** Leave as defaults (Build Command: \
+pm run build\, Output Directory: \dist\).
+5. **Set Environment Variables:**
+   - Add \VITE_API_URL\ as a new variable.
+   - Set the value to the live backend URL you generated from Railway.
+   - **Important:** Ensure your React code uses \import.meta.env.VITE_API_URL\ wherever it calls the backend instead of \http://localhost:5000\.
+6. **Deploy:** Click **Deploy**. Vercel will build your Vite app and give you a live production URL.
 
-```env
-MONGODB_URL=your_mongodb_connection_string
-OPENAI_API_KEY=your_openai_api_key
-CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
-CLOUDINARY_API_KEY=your_cloudinary_api_key
-CLOUDINARY_API_SECRET=your_cloudinary_api_secret
-```
+---
 
-### Backend Health Check
+## 3. Post-Deployment Checklist
 
-After deploy, verify:
-
-- `GET /` returns `{ "message": "Hello from DALL.E!" }`
-- `GET /api/v1/post` returns `{ success: true, data: [...] }` when data exists
-
-## 3. Frontend Deployment
-
-Deploy the `client/` folder as a static Vite site.
-
-### Build Settings
-
-- Install command: `npm install`
-- Build command: `npm run build`
-- Output directory: `dist`
-
-### Required Environment Variable
-
-Set this in your frontend deployment environment:
-
-```env
-VITE_API_URL=https://your-backend-domain
-```
-
-The frontend uses `VITE_API_URL` to call:
-
-- `POST /api/v1/dalle`
-- `GET /api/v1/post`
-- `POST /api/v1/post`
-
-## 4. End-to-End Validation Checklist
-
-1. Open the frontend URL and confirm the app loads.
-2. Create a prompt and generate an image.
-3. Share the generated image to the community.
-4. Confirm the image appears on the home feed.
-5. Download an image card and verify file output.
-
-## 5. Troubleshooting
-
-- `Failed to fetch` from frontend:
-  - Check `VITE_API_URL` value and redeploy frontend.
-  - Ensure backend CORS is enabled and backend is reachable.
-- Backend starts but image generation fails:
-  - Verify `OPENAI_API_KEY` is valid.
-- Post creation fails:
-  - Verify Cloudinary credentials and MongoDB connection string.
-
-## 6. Hardening Recommendations
-
-- Add request validation and payload size limits per route.
-- Add authentication/authorization for post creation.
-- Add API rate limiting for generation endpoints.
-- Add structured logging and monitoring.
-- Rotate API keys regularly.
+- **Test Generation:** Visit your Vercel URL and try generating a new image.
+- **Check Dashboard Logs:** Monitor Railway logs if image generations fail to ensure your Gemini and Cloudinary keys are active.
+- **CORS Check:** If your frontend receives CORS errors, verify that your backend \server/index.js\ has \pp.use(cors())\ correctly configured to accept requests from your Vercel URL.
