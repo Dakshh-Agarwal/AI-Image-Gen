@@ -1,0 +1,13 @@
+﻿{
+  "name": "ai-image-gen-root",
+  "version": "1.0.0",
+  "description": "Root package.json to help Railway auto-detect the Node.js environment",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "scripts": {
+    "install": "cd server && npm install",
+    "build": "cd server && npm install",
+    "start": "cd server && npm start"
+  }
+}
